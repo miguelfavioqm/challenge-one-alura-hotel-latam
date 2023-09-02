@@ -6,6 +6,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+
+import alurahotel.GuardarReserva;
+
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JButton;
@@ -16,6 +19,7 @@ import javax.swing.JLabel;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.Map;
 import java.awt.event.ActionEvent;
 import javax.swing.JTabbedPane;
 import java.awt.Toolkit;
@@ -25,6 +29,9 @@ import javax.swing.ListSelectionModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.io.Console;
+import java.sql.Date;
+import java.sql.SQLException;
 
 @SuppressWarnings("serial")
 public class Busqueda extends JFrame {
@@ -99,8 +106,14 @@ public class Busqueda extends JFrame {
 		modelo.addColumn("Numero de Reserva");
 		modelo.addColumn("Fecha Check In");
 		modelo.addColumn("Fecha Check Out");
-		modelo.addColumn("Valor");
+		modelo.addColumn("Valor");	
 		modelo.addColumn("Forma de Pago");
+		try {
+			GuardarReserva r = new GuardarReserva();
+			cargarTabla(r);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 		JScrollPane scroll_table = new JScrollPane(tbReservas);
 		panel.addTab("Reservas", new ImageIcon(Busqueda.class.getResource("/imagenes/reservado.png")), scroll_table, null);
 		scroll_table.setVisible(true);
@@ -117,6 +130,22 @@ public class Busqueda extends JFrame {
 		modeloHuesped.addColumn("Nacionalidad");
 		modeloHuesped.addColumn("Telefono");
 		modeloHuesped.addColumn("Número de Reserva");
+		try {
+			System.out.println("HOLA");
+			GuardarReserva h = new GuardarReserva();
+			List<Map<String, String>> huespedes =  h.obtenerHuespedes();
+			huespedes.forEach(huesped -> modeloHuesped.addRow(new Object[] {
+				huesped.get("idHuespedes"), 
+				huesped.get("Nombre"),
+				huesped.get("Apellido"),
+				huesped.get("FechaNacimiento"),
+				huesped.get("Nacionalidad"),
+				huesped.get("Telefono"),
+				huesped.get("IdReserva")
+			}));
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 		JScrollPane scroll_tableHuespedes = new JScrollPane(tbHuespedes);
 		panel.addTab("Huéspedes", new ImageIcon(Busqueda.class.getResource("/imagenes/pessoas.png")), scroll_tableHuespedes, null);
 		scroll_tableHuespedes.setVisible(true);
@@ -151,7 +180,7 @@ public class Busqueda extends JFrame {
 			public void mouseClicked(MouseEvent e) {
 				MenuUsuario usuario = new MenuUsuario();
 				usuario.setVisible(true);
-				dispose();				
+				dispose();
 			}
 			@Override
 			public void mouseEntered(MouseEvent e) {
@@ -240,6 +269,39 @@ public class Busqueda extends JFrame {
 		contentPane.add(btnEditar);
 		
 		JLabel lblEditar = new JLabel("EDITAR");
+		lblEditar.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(tbReservas.getSelectedRow() != -1) {
+					Integer idReserva = Integer.valueOf(modelo.getValueAt(tbReservas.getSelectedRow(),0).toString());
+					Date Fecha_Entrada = Date.valueOf(modelo.getValueAt(tbReservas.getSelectedRow(),1).toString());
+					Date Fecha_Salida = Date.valueOf(modelo.getValueAt(tbReservas.getSelectedRow(),2).toString());
+					String Valor = String.valueOf(modelo.getValueAt(tbReservas.getSelectedRow(),3).toString());
+					String Forma_Pago = String.valueOf(modelo.getValueAt(tbReservas.getSelectedRow(),4).toString());
+					try {
+						GuardarReserva r = new GuardarReserva();
+						r.modificarReserva(Fecha_Entrada, Fecha_Salida, Valor, Forma_Pago, idReserva);
+					} catch (Exception e2) {
+						System.out.println(e2);
+					}
+				}
+				if(tbHuespedes.getSelectedRow() != -1) {
+					Integer idHuesped = Integer.valueOf(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),0).toString());
+					String nombre = String.valueOf(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),1).toString());
+					String apellido = String.valueOf(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),2).toString());
+					Date FechaNacimiento = Date.valueOf(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),3).toString());
+					String Nacionalidad = String.valueOf(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),4).toString());
+					String telefono = String.valueOf(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),5).toString());
+					Integer idReserva = Integer.valueOf(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),6).toString());
+					try {
+						GuardarReserva r = new GuardarReserva();
+						r.modificarHuesped(nombre, apellido, FechaNacimiento, Nacionalidad, telefono, idReserva, idHuesped);	
+					} catch (Exception e2) {
+						System.out.println(e2);
+					}
+				}
+			}
+		});
 		lblEditar.setHorizontalAlignment(SwingConstants.CENTER);
 		lblEditar.setForeground(Color.WHITE);
 		lblEditar.setFont(new Font("Roboto", Font.PLAIN, 18));
@@ -254,12 +316,54 @@ public class Busqueda extends JFrame {
 		contentPane.add(btnEliminar);
 		
 		JLabel lblEliminar = new JLabel("ELIMINAR");
+		lblEliminar.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(tbReservas.getSelectedRow() != -1) {
+					Integer idReserva = Integer.valueOf(modelo.getValueAt(tbReservas.getSelectedRow(),0).toString());
+					//Integer idHuesped = Integer.valueOf(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),0).toString());
+					//System.out.println(idHuesped);
+					try {
+						GuardarReserva r = new GuardarReserva();
+						r.eliminarReserva(idReserva);
+						modelo.removeRow(tbReservas.getSelectedRow());
+					} catch (Exception e2) {
+						System.out.println(e2);
+					}
+				}
+				if(tbHuespedes.getSelectedRow() != -1) {
+					Integer idHuesped = Integer.valueOf(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),0).toString());
+					try {
+						GuardarReserva r = new GuardarReserva();
+						r.eliminarHuesped(idHuesped);
+						modeloHuesped.removeRow(tbHuespedes.getSelectedRow());
+					} catch (Exception e2) {
+						System.out.println(e2);
+					}
+				}
+				
+			}
+				
+				
+		});
 		lblEliminar.setHorizontalAlignment(SwingConstants.CENTER);
 		lblEliminar.setForeground(Color.WHITE);
 		lblEliminar.setFont(new Font("Roboto", Font.PLAIN, 18));
 		lblEliminar.setBounds(0, 0, 122, 35);
 		btnEliminar.add(lblEliminar);
 		setResizable(false);
+	}
+
+	private void cargarTabla(GuardarReserva r) throws SQLException {
+		List<Map<String, String>> reservas =  r.obtenerReservas();
+		reservas.forEach(reserva -> modelo.addRow(new Object[] {
+			reserva.get("Id"), 
+			reserva.get("Fecha_Entrada"),
+			reserva.get("Fecha_Salida"),
+			reserva.get("Valor"),
+			reserva.get("Forma_Pago")
+			
+		}));
 	}
 	
 //Código que permite mover la ventana por la pantalla según la posición de "x" y "y"

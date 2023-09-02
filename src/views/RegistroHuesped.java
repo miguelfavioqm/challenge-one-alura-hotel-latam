@@ -7,6 +7,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JTextField;
 import java.awt.Color;
 import com.toedter.calendar.JDateChooser;
+
+import alurahotel.GuardarReserva;
+
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
@@ -38,6 +41,7 @@ public class RegistroHuesped extends JFrame {
 	private JLabel labelExit;
 	private JLabel labelAtras;
 	int xMouse, yMouse;
+	private Integer id;
 
 	/**
 	 * Launch the application.
@@ -46,7 +50,7 @@ public class RegistroHuesped extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					RegistroHuesped frame = new RegistroHuesped();
+					RegistroHuesped frame = new RegistroHuesped(0);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -58,8 +62,9 @@ public class RegistroHuesped extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public RegistroHuesped() {
-		
+	public RegistroHuesped(Integer id) {
+		this.id = id;
+		System.out.println(id);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(RegistroHuesped.class.getResource("/imagenes/lOGO-50PX.png")));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 910, 634);
@@ -210,6 +215,7 @@ public class RegistroHuesped extends JFrame {
 		txtNreserva.setColumns(10);
 		txtNreserva.setBackground(Color.WHITE);
 		txtNreserva.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+		txtNreserva.setText(id.toString());
 		contentPane.add(txtNreserva);
 		
 		JSeparator separator_1_2 = new JSeparator();
@@ -253,6 +259,22 @@ public class RegistroHuesped extends JFrame {
 		btnguardar.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				try {
+					java.sql.Date date1 = new java.sql.Date(txtFechaN.getDate().getTime());
+					GuardarReserva g = new GuardarReserva();
+					g.saveHuesped(
+							txtNombre.getText(), 
+							txtApellido.getText(), 
+							date1, 
+							txtNacionalidad.getSelectedItem().toString(), 
+							txtTelefono.getText(), 
+							id);
+					setVisible(false);
+					Exito exito = new Exito();
+					exito.setVisible(true);
+				} catch (Exception e2) {
+					System.out.println("ERROR AL GUARDAR DATOS DE HUESPED" +e2);
+				}
 			}
 		});
 		btnguardar.setLayout(null);
