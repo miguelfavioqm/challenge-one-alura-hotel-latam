@@ -9,7 +9,9 @@
 
 
 #### 🔹 Marca este proyecto con una ⭐
-#### 🔹 Sigue las orientaciones que tenemos en este repositorio. 📚
+#### 🔹 EL siguiente proyecto fue realizado en ECLIPSE Version: 2023-03 (4.27.0) JDK 17 conectado a una base de datos MySQL
+#### 🔹 Desarrollado por Miguel Favio Quispe Mamani como parte de la formacion Backend Alura
+#### 🔹 Dejo las orientacion del repositorio base
 #### 🔹 ¡Visita la página del desafío haciendo clic aquí! [Link do Challenge](https://www.aluracursos.com/challenges/oracle-one-back-end/hotelalura) 📃
 </br>
 
